@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Parser GUI</title>
+    <title>Log Parser</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -13,7 +13,7 @@
         <header class="app-header">
             <div class="container">
                 <div class="header-content">
-                    <h1 class="app-title">Log Parser GUI</h1>
+                    <h1 class="app-title">Log Parser</h1>
                     <div class="header-controls">
                         <button id="themeToggle" class="btn btn--outline btn--sm">
                             <span id="themeIcon">🌙</span>
@@ -120,7 +120,7 @@
 
                         <div class="form-group custom-regex-group hidden">
                             <label class="form-label" for="customRegex">Custom Regex Pattern</label>
-                            <textarea id="customRegex" class="form-control" rows="3" placeholder="Enter your custom regex pattern... e.g., (?<timestamp>\\[.+?\\]) (?<level>\\w+): (?<message>.+)"></textarea>
+                            <textarea id="customRegex" class="form-control" rows="3" placeholder="Enter your custom regex pattern..."></textarea>
                         </div>
 
                         <div class="config-preview">
@@ -156,7 +156,12 @@
                             <table class="data-table" id="dataTable">
                                 <thead>
                                     <tr id="tableHeader">
-                                        <!-- Headers will be dynamically generated -->
+                                        <th data-sort="timestamp">Timestamp <span class="sort-icon">↕</span></th>
+                                        <th data-sort="ip">IP Address <span class="sort-icon">↕</span></th>
+                                        <th data-sort="method">Method <span class="sort-icon">↕</span></th>
+                                        <th data-sort="url">URL <span class="sort-icon">↕</span></th>
+                                        <th data-sort="status">Status <span class="sort-icon">↕</span></th>
+                                        <th data-sort="size">Size <span class="sort-icon">↕</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody">
@@ -256,9 +261,6 @@
                                     <label class="checkbox-label">
                                         <input type="checkbox" value="ip" checked> IP Address
                                     </label>
-                                     <label class="checkbox-label">
-                                        <input type="checkbox" value="user" checked> User
-                                    </label>
                                     <label class="checkbox-label">
                                         <input type="checkbox" value="method" checked> Method
                                     </label>
@@ -270,15 +272,6 @@
                                     </label>
                                     <label class="checkbox-label">
                                         <input type="checkbox" value="size" checked> Size
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" value="level"> Level
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" value="message"> Message
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" value="originalLine"> Original Line
                                     </label>
                                 </div>
                             </div>
