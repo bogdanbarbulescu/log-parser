@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" data-color-scheme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Parser GUI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="container">
+                <div class="header-content">
+                    <h1 class="app-title">Log Parser GUI</h1>
+                    <div class="header-controls">
+                        <button id="themeToggle" class="btn btn--outline btn--sm">
+                            <span id="themeIcon">🌙</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <div class="container">
+                <div class="tab-list">
+                    <button class="tab-button active" data-tab="upload">File Upload</button>
+                    <button class="tab-button" data-tab="config">Parser Config</button>
+                    <button class="tab-button" data-tab="data">Data View</button>
+                    <button class="tab-button" data-tab="analytics">Analytics</button>
+                    <button class="tab-button" data-tab="export">Export</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- File Upload Tab -->
+                <div id="upload-tab" class="tab-content active">
+                    <div class="upload-section">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content">
+                                <div class="upload-icon">📁</div>
+                                <h3>Drag & Drop Log Files Here</h3>
+                                <p>or click to browse files</p>
+                                <button class="btn btn--primary" id="fileButton">Choose File</button>
+                                <input type="file" id="fileInput" accept=".log,.txt,.json,.csv" hidden>
+                                <p class="upload-info">Supported formats: .log, .txt, .json, .csv (Max 50MB)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="upload-progress hidden" id="uploadProgress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <p class="progress-text" id="progressText">Uploading... 0%</p>
+                        </div>
+
+                        <div class="file-preview hidden" id="filePreview">
+                            <h4>File Preview</h4>
+                            <div class="preview-info">
+                                <span id="fileName"></span>
+                                <span id="fileSize"></span>
+                                <span class="status" id="formatDetected"></span>
+                            </div>
+                            <pre id="previewContent"></pre>
+                            <button class="btn btn--primary" id="parseButton">Parse Log File</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parser Config Tab -->
+                <div id="config-tab" class="tab-content">
+                    <div class="config-section">
+                        <h3>Parser Configuration</h3>
+                        
+                        <div class="config-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="logFormat">Log Format</label>
+                                <select id="logFormat" class="form-control">
+                                    <option value="auto">Auto-detect</option>
+                                    <option value="clf">Common Log Format (CLF)</option>
+                                    <option value="combined">Combined Log Format</option>
+                                    <option value="json">JSON</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="app">Application Logs</option>
+                                    <option value="custom">Custom Regex</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="delimiter">CSV Delimiter</label>
+                                <select id="delimiter" class="form-control">
+                                    <option value=",">Comma (,)</option>
+                                    <option value=";">Semicolon (;)</option>
+                                    <option value="\t">Tab</option>
+                                    <option value="|">Pipe (|)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="timezone">Timezone</label>
+                                <select id="timezone" class="form-control">
+                                    <option value="UTC">UTC</option>
+                                    <option value="EST">EST</option>
+                                    <option value="PST">PST</option>
+                                    <option value="GMT">GMT</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="dateFormat">Date Format Pattern</label>
+                                <input type="text" id="dateFormat" class="form-control" placeholder="YYYY-MM-DD HH:mm:ss">
+                            </div>
+                        </div>
+
+                        <div class="form-group custom-regex-group hidden">
+                            <label class="form-label" for="customRegex">Custom Regex Pattern</label>
+                            <textarea id="customRegex" class="form-control" rows="3" placeholder="Enter your custom regex pattern... e.g., (?<timestamp>\\[.+?\\]) (?<level>\\w+): (?<message>.+)"></textarea>
+                        </div>
+
+                        <div class="config-preview">
+                            <h4>Parsing Rules Preview</h4>
+                            <div class="preview-rules" id="previewRules">
+                                Select a log format to see parsing rules.
+                            </div>
+                        </div>
+
+                        <button class="btn btn--primary" id="applyConfig">Apply Configuration</button>
+                    </div>
+                </div>
+
+                <!-- Data View Tab -->
+                <div id="data-tab" class="tab-content">
+                    <div class="data-section">
+                        <div class="data-controls">
+                            <div class="search-box">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Search logs...">
+                            </div>
+                            <div class="view-controls">
+                                <select id="entriesPerPage" class="form-control">
+                                    <option value="10">10 per page</option>
+                                    <option value="25" selected>25 per page</option>
+                                    <option value="50">50 per page</option>
+                                    <option value="100">100 per page</option>
+                                </select>
+                                <button class="btn btn--outline btn--sm" id="columnToggle">Columns</button>
+                            </div>
+                        </div>
+
+                        <div class="data-table-container">
+                            <table class="data-table" id="dataTable">
+                                <thead>
+                                    <tr id="tableHeader">
+                                        <!-- Headers will be dynamically generated -->
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    <tr class="no-data">
+                                        <td colspan="6">No log data available. Please upload and parse a log file first.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination">
+                            <div class="pagination-info">
+                                <span id="paginationInfo">Showing 0 of 0 entries</span>
+                            </div>
+                            <div class="pagination-controls">
+                                <button class="btn btn--outline btn--sm" id="prevPage" disabled>Previous</button>
+                                <span class="page-numbers" id="pageNumbers"></span>
+                                <button class="btn btn--outline btn--sm" id="nextPage" disabled>Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div id="analytics-tab" class="tab-content">
+                    <div class="analytics-section">
+                        <div class="stats-cards">
+                            <div class="stat-card">
+                                <h4>Total Entries</h4>
+                                <div class="stat-value" id="totalEntries">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Date Range</h4>
+                                <div class="stat-value" id="dateRange">-</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Unique IPs</h4>
+                                <div class="stat-value" id="uniqueIPs">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Error Rate</h4>
+                                <div class="stat-value" id="errorRate">0%</div>
+                            </div>
+                        </div>
+
+                        <div class="charts-grid">
+                            <div class="chart-container">
+                                <h4>Log Volume Over Time</h4>
+                                <canvas id="timelineChart" height="200"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4>Status Code Distribution</h4>
+                                <canvas id="statusChart" height="200"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4>Top Requested URLs</h4>
+                                <canvas id="urlChart" height="200"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4>Request Methods</h4>
+                                <canvas id="methodChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Tab -->
+                <div id="export-tab" class="tab-content">
+                    <div class="export-section">
+                        <h3>Export Data</h3>
+                        
+                        <div class="export-config">
+                            <div class="form-group">
+                                <label class="form-label" for="exportFormat">Export Format</label>
+                                <select id="exportFormat" class="form-control">
+                                    <option value="json">JSON</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="txt">Text Report</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Date Range</label>
+                                <div class="date-range">
+                                    <input type="date" id="exportStartDate" class="form-control">
+                                    <span>to</span>
+                                    <input type="date" id="exportEndDate" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Fields to Include</label>
+                                <div class="field-checkboxes">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="timestamp" checked> Timestamp
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="ip" checked> IP Address
+                                    </label>
+                                     <label class="checkbox-label">
+                                        <input type="checkbox" value="user" checked> User
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="method" checked> Method
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="url" checked> URL
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="status" checked> Status
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="size" checked> Size
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="level"> Level
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="message"> Message
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="originalLine"> Original Line
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="export-actions">
+                            <button class="btn btn--primary" id="exportButton">Download Export</button>
+                            <button class="btn btn--outline" id="previewExport">Preview Export</button>
+                        </div>
+
+                        <div class="export-preview hidden" id="exportPreview">
+                            <h4>Export Preview</h4>
+                            <pre id="exportContent"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
